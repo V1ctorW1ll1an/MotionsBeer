@@ -1,4 +1,4 @@
-# ... titulo aqui
+# titulo aqui
 
 ## Descrição do Projeto
 
