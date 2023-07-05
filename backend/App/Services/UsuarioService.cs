@@ -176,11 +176,20 @@ namespace App.Services
             );
         }
 
-        public Task<ServiceResult<IEnumerable<Usuario>>> ObterUsuariosAsync(
+        public Task<ServiceResult<ObterUsuariosOutput>> ObterUsuariosAsync(
             int pagina,
             int tamanhoPagina
         )
         {
+            if (tamanhoPagina == 0)
+                return Task.FromResult(
+                    ServiceResult<ObterUsuariosOutput>.Failure("O tamanho da página não pode ser 0")
+                );
+            var totalPages =
+                _dataBaseContext.Usuarios.Count() == 0
+                    ? 0
+                    : _dataBaseContext.Usuarios.Count() / tamanhoPagina + 1;
+
             var usuarios = _dataBaseContext.Usuarios
                 .Where(f => f.IsEnable)
                 .Skip((pagina - 1) * tamanhoPagina)
@@ -188,24 +197,26 @@ namespace App.Services
 
             if (!usuarios.Any())
                 return Task.FromResult(
-                    ServiceResult<IEnumerable<Usuario>>.Failure(
+                    ServiceResult<ObterUsuariosOutput>.Failure(
                         "Não existem funcionários cadastrados em nosso sistema"
                     )
                 );
 
+            var newUsers = usuarios.Select(
+                f =>
+                    new Usuario()
+                    {
+                        Id = f.Id,
+                        Nome = f.Nome,
+                        Email = f.Email,
+                        NivelDeAcesso = f.NivelDeAcesso,
+                        Cpf = f.Cpf
+                    }
+            );
+
             return Task.FromResult(
-                ServiceResult<IEnumerable<Usuario>>.Success(
-                    usuarios.Select(
-                        f =>
-                            new Usuario()
-                            {
-                                Id = f.Id,
-                                Nome = f.Nome,
-                                Email = f.Email,
-                                NivelDeAcesso = f.NivelDeAcesso,
-                                Cpf = f.Cpf
-                            }
-                    )
+                ServiceResult<ObterUsuariosOutput>.Success(
+                    new ObterUsuariosOutput() { TotalPages = totalPages, Usuarios = newUsers }
                 )
             );
         }

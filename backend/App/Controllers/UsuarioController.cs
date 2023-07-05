@@ -1,12 +1,13 @@
 ﻿using App.Models;
 using App.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace App.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    // [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin")]
     public class UsuarioController : ControllerBase
     {
         private readonly IUsuarioService _usuarioService;
@@ -94,21 +95,11 @@ namespace App.Controllers
                 if (!resultado.IsSuccess)
                     return BadRequest(new { mensagem = resultado.ErrorMessage });
 
-                var usuarios = resultado.Value;
                 return Ok(
                     new
                     {
-                        usuarios = usuarios.Select(
-                            f =>
-                                new
-                                {
-                                    f.Id,
-                                    f.Nome,
-                                    f.Email,
-                                    f.NivelDeAcesso,
-                                    f.Cpf
-                                }
-                        )
+                        usuarios = resultado.Value.Usuarios,
+                        totalPaginas = resultado.Value.TotalPages,
                     }
                 );
             }
