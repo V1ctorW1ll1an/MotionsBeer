@@ -8,4 +8,6 @@ public class DataBaseContext : DbContext
         : base(options) { }
 
     public DbSet<Usuario> Usuarios { get; set; } = null!;
+
+    public DbSet<OrdemProducao> OrdensProducao { get; set; } = null!;
 }
