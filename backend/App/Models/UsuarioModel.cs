@@ -44,4 +44,6 @@ public class Usuario
         ErrorMessage = "Você deve informar um cargo válido (Admin = 1, Tecnico = 2, Usuario = 3)"
     )]
     public NivelDeAcesso NivelDeAcesso { get; set; }
+
+    public List<OrdemProducao>? OrdensProducao { get; set; }
 }
