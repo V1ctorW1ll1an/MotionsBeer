@@ -188,7 +188,10 @@ namespace App.Services
             var totalPages =
                 _dataBaseContext.Usuarios.Count() == 0
                     ? 0
-                    : _dataBaseContext.Usuarios.Count() / tamanhoPagina + 1;
+                    : (int)
+                        Math.Ceiling(
+                            (double)_dataBaseContext.OrdensProducao.Count() / tamanhoPagina
+                        );
 
             var usuarios = _dataBaseContext.Usuarios
                 .Where(f => f.IsEnable)

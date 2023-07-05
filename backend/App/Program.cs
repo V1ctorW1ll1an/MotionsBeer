@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -52,6 +54,7 @@ void ConfigureServices(IServiceCollection services)
     // Login
     services.AddScoped<ITokenService, TokenService>();
     services.AddScoped<IUsuarioService, UsuarioService>();
+    services.AddScoped<IOrdemProducaoService, OrdemProducaoService>();
 
     // crypto
     services.AddScoped<ICryptoService, Argon2Service>();

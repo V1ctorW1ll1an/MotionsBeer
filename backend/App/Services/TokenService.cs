@@ -19,7 +19,8 @@ public class TokenService : ITokenService
                 new Claim[]
                 {
                     new Claim(ClaimTypes.Name, usuario.Nome.ToString()), // User.Identity.Name
-                    new Claim(ClaimTypes.Role, usuario.NivelDeAcesso.ToString()) // User.IsInRole("1")
+                    new Claim(ClaimTypes.Role, usuario.NivelDeAcesso.ToString()), // User.IsInRole("1")
+                    new Claim("id", usuario.Id.ToString()) // User.Claims.FirstOrDefault(c => c.Type == "id").Value
                 }
             ),
             Expires = DateTime.UtcNow.AddHours(40),
