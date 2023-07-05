@@ -18,7 +18,7 @@ class RestApiClient
 
   /**
    * Perform a GET request
-   *
+   * 
    * @param string $url
    * @param array $queries
    * @param string $token

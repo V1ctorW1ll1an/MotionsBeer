@@ -3,7 +3,6 @@ session_start();
 require_once 'RestApiClient.php';
 
 // use the api to login
-
 $data = array(
   "email" => "admin@teste.com",
   "senha" => "123456"

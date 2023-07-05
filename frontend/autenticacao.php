@@ -1,5 +1,4 @@
 <?php
-
 // importar o restClient
 require_once('./RestApiClient.php');
 
@@ -20,23 +19,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   $response = $restClient->post('login', $dados);
 
   // se o token for diferente de null
-  if ($response['token'] != null) {
+  if (isset($response["token"]) && $response['token'] != null) {
+    
     // inicia a sessão
     session_start();
     // cria uma variavel de sessão com o token
     $_SESSION['token'] = $response['token'];
     $_SESSION['usuario'] = $response['usuario'];
     // redireciona para a pagina de funcionarios
-    // header('Location: funcionarios.php');
-  } else if ($response['mensagem'] != null) {
+    header('Location: /menu/');
+  } else if (isset($response) != null) {
     // se a mensagem for diferente de null
     // mostra a mensagem de erro
-    echo $response['mensagem'];
+    session_start();
+    $_SESSION["login_status"] = "error";
+    $_SESSION["mensagem"] = $response;
+    header('Location: /');
   }
 }
 
-
 ?>
+
 <!DOCTYPE html>
 <html lang="pt-br">
 
@@ -50,13 +53,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 <body>
 
-  <div class="loginbox">
-    <img src="imagens/user.png" class="avatar">
-
-    <?php
-
-    ?>
-  </div>
 </body>
 
 </html>
