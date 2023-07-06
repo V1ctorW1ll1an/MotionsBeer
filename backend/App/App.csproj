@@ -25,4 +25,10 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
   </ItemGroup>
 
+   <!-- Configuração para definir a cultura globalmente -->
+  <PropertyGroup>
+    <PreserveCompilationContext>true</PreserveCompilationContext>
+    <DefineConstants>$(DefineConstants);DOTNET_USE_GLOBALIZATION_INVARIANT=false</DefineConstants>
+  </PropertyGroup>
+
 </Project>

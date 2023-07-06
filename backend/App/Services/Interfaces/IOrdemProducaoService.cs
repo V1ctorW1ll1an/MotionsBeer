@@ -20,4 +20,10 @@ public interface IOrdemProducaoService
         int tamanhoPagina,
         int UserId
     );
+
+    Task<ServiceResult<OrdemProducao>> UpdateProcessStepAsync(
+        int id,
+        int userId,
+        Processo processStep
+    );
 }

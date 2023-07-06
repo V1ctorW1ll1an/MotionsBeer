@@ -9,6 +9,10 @@ using Microsoft.IdentityModel.Tokens;
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
+DateTime dateTime = DateTime.UtcNow;
+TimeZoneInfo horaBrasilia = TimeZoneInfo.FindSystemTimeZoneById("E. South America Standard Time");
+TimeZoneInfo.ConvertTimeFromUtc(dateTime, horaBrasilia);
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
