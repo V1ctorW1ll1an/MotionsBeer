@@ -3,6 +3,39 @@ session_start();
 if (!isset($_SESSION["usuario"])) {
   header("location:/");
 }
+
+$currentPage = 1;
+$pageLength = 2;
+$finished = null;
+
+if (isset($_GET["finished"])) {
+  $finished = $_GET["finished"];
+}
+
+if (isset($_GET["page"])) {
+  $currentPage = $_GET["page"];
+}
+
+require_once("../RestApiClient.php");
+
+$api = new RestApiClient();
+
+$queries = array(
+  "pagina" => $currentPage,
+  "tamanhoPagina" => $pageLength
+);
+
+
+$response = $api->get("OrdemProducao/ProcessStep", $queries, $_SESSION["token"]);
+
+$ordensProducao = array();
+$totalPages = 1;
+
+if (isset($response) && isset($response["ordensProducao"])) {
+  $ordensProducao = $response["ordensProducao"];
+  $totalPages = $response["totalPages"];
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -41,20 +74,39 @@ if (!isset($_SESSION["usuario"])) {
 </head>
 
 <style>
-  
+  .alert {
+    padding: 20px;
+    margin: 10px 0;
+  }
+
+  .alert.alert-success {
+    color: #3c763d;
+    background-color: #dff0d8;
+    border-color: #d6e9c6;
+  }
+
+  .alert.alert-error {
+    color: #a94442;
+    background-color: #f2dede;
+    border-color: #ebccd1;
+  }
+
   .button-custom i.bx-stop {
-    font-size: 26px; /* Tamanho do ícone aumentado */
+    font-size: 26px;
+    /* Tamanho do ícone aumentado */
     /* Outros estilos opcionais para o ícone */
   }
 
   .button-custom2 i.bx-skip-next {
-    font-size: 26px; /* Tamanho do ícone aumentado */
+    font-size: 26px;
+    /* Tamanho do ícone aumentado */
     /* Outros estilos opcionais para o ícone */
   }
-  
+
   .button-custom3 i.bx-reset {
     color: #ffffff;
-    font-size: 26px; /* Tamanho do ícone aumentado */
+    font-size: 26px;
+    /* Tamanho do ícone aumentado */
     /* Outros estilos opcionais para o ícone */
   }
 
@@ -339,6 +391,25 @@ if (!isset($_SESSION["usuario"])) {
   <!-- Cabeçalho -->
   <div>
     <h1 class="display-2">Acompanhar Processo</h1>
+    <div>
+      <?php
+      if ($finished != null) {
+        if ($finished == "true") {
+          echo "<div class='alert alert-success' role='alert'>
+                    Ordem de Produção interrompida com sucesso!
+                </div>";
+        } else if (isset($_SESSION["finalizerOpError"])) {
+          echo "<div class='alert alert-error' role='alert'>
+                   {$_SESSION["finalizerOpError"]}
+                </div>";
+        } else {
+          echo "<div class='alert alert-error' role='alert'>
+                   Erro ao finalizar a ordem de produção!
+                </div>";
+        }
+      }
+      ?>
+    </div>
     <div class="card">
       <div class="container">
         <div class="row">
@@ -354,8 +425,8 @@ if (!isset($_SESSION["usuario"])) {
                 Ordem Produção
               </th>
               <th>
-              <a href="pagina_de_informacoes.html" class="info-icon"><span class="circle"></span>ⓘ</a>
-              Maltagem...
+                <a href="pagina_de_informacoes.html" class="info-icon"><span class="circle"></span>ⓘ</a>
+                Maltagem...
               </th>
               <th>
                 <a href="pagina_de_informacoes.html" class="info-icon"><span class="circle"></span>ⓘ</a>
@@ -367,7 +438,7 @@ if (!isset($_SESSION["usuario"])) {
               </th>
               <th>
                 <a href="pagina_de_informacoes.html" class="info-icon"><span class="circle"></span>ⓘ</a>
-                Filtragem... 
+                Filtragem...
               </th>
               <th>
                 <a href="pagina_de_informacoes.html" class="info-icon"><span class="circle"></span>ⓘ</a>
@@ -381,61 +452,124 @@ if (!isset($_SESSION["usuario"])) {
                 <a href="pagina_de_informacoes.html" class="info-icon"><span class="circle"></span>ⓘ</a>
                 Engarrafamento...
               </th>
-              
-              <th></th>
+
               <th></th>
               <th></th>
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>
-                00001
-              </td>
-              <td>
-                Finalizado
-                <progress value="100" max="100"></progress>
-              </td>
-              <td>
-                Finalizado
-                <progress value="100" max="100"></progress>
-              </td>
-              <td>
-                Faltam: 26hrs
-                <progress value="52" max="100"></progress>
-              </td>
-              <td>
-                Aguardando
-                <progress value="0" max="100"></progress>
-              </td>
-              <td>
-                Aguardando
-                <progress value="0" max="100"></progress>
-              </td>
-              <td>
-                Aguardando
-                <progress value="0" max="100"></progress>
-              </td>
-              <td>
-                Aguardando
-                <progress value="0" max="100"></progress>
-              </td>
-              
+            <?php foreach ($ordensProducao as $op): ?>
+              <tr>
+                <td>
+                  <?php echo $op["id"] ?>
+                </td>
+                <td>
+                  <?php
+                  if ($op["etapaNoProcesso"] == 0) {
+                    echo "Aguardando";
+                  } else if ($op["etapaNoProcesso"] == 1) {
+                    echo "Em andamento";
+                  } else {
+                    echo "Finalizado";
+                  }
+                  ?>
 
-              <td><button class="button-custom" onclick="redirecionar()"><i class='bx bx-stop'></i></button></td>
-              <td><button class="button-custom3" onclick="redirecionar()"><i class='bx bx-reset'></i></button></td>
-              <td><button class="button-custom2"
-                  onclick="window.location.href='/transferencia-de-producao/'"><i class='bx bx-skip-next'></i></button></td>
-            </tr>
+                </td>
+                <td>
+                  <?php
+                  if ($op["etapaNoProcesso"] < 2) {
+                    echo "Aguardando";
+                  } else if ($op["etapaNoProcesso"] == 2) {
+                    echo "Em andamento";
+                  } else {
+                    echo "Finalizado";
+                  }
+                  ?>
+                </td>
+                <td>
+                  <?php
+                  if ($op["etapaNoProcesso"] < 3) {
+                    echo "Aguardando";
+                  } else if ($op["etapaNoProcesso"] == 3) {
+                    echo "Em andamento";
+                  } else {
+                    echo "Finalizado";
+                  }
+                  ?>
+
+                </td>
+                <td>
+                  <?php
+                  if ($op["etapaNoProcesso"] < 4) {
+                    echo "Aguardando";
+                  } else if ($op["etapaNoProcesso"] == 4) {
+                    echo "Em andamento";
+                  } else {
+                    echo "Finalizado";
+                  }
+                  ?>
+
+                </td>
+                <td>
+                  <?php
+                  if ($op["etapaNoProcesso"] < 5) {
+                    echo "Aguardando";
+                  } else if ($op["etapaNoProcesso"] == 5) {
+                    echo "Em andamento";
+                  } else {
+                    echo "Finalizado";
+                  }
+                  ?>
+
+                </td>
+                <td>
+                  <?php
+                  if ($op["etapaNoProcesso"] < 6) {
+                    echo "Aguardando";
+                  } else if ($op["etapaNoProcesso"] == 6) {
+                    echo "Em andamento";
+                  } else {
+                    echo "Finalizado";
+                  }
+                  ?>
+                </td>
+                <td>
+                  <?php
+                  if ($op["etapaNoProcesso"] < 7) {
+                    echo "Aguardando";
+                  } else if ($op["etapaNoProcesso"] == 7) {
+                    echo "Em andamento";
+                  } else {
+                    echo "Finalizado";
+                  }
+                  ?>
+                </td>
+                <td>
+                  <form action="/transferencia-de-producao/finalizar-op.php/" method="POST">
+                    <input type="hidden" name="opId" id="opId" value="<?php echo $op["id"] ?>">
+                    <button class="button-custom" type="submit"><i class='bx bx-stop'></i></button>
+                  </form>
+                </td>
+                <td>
+                  <form method="POST" action="/transferencia-de-producao/">
+                    <input type="hidden" name="processId" id="processId" value="<?php echo $op["id"] ?>">
+                    <input type="hidden" name="nextStep" id="nextStep"
+                      value="<?php echo (int) $op["etapaNoProcesso"] + 1 ?>">
+                    <button class="button-custom2" type="submit">
+                      <i class='bx bx-skip-next'></i>
+                    </button>
+                  </form>
+                </td>
+              </tr>
+            <?php endforeach; ?>
           </tbody>
         </table>
         <div class="pagination">
           <ul>
-            <li><a href="#" class="active">1</a></li>
-            <li><a href="#">2</a></li>
-            <li><a href="#">3</a></li>
-            <li><a href="#">4</a></li>
-            <li><a href="#">5</a></li>
+            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+              <li><a class="<?php if ($i == $currentPage)
+                echo "active" ?>" href="?page=<?php echo $i ?>"><?php echo $i ?></a></li>
+            <?php endfor; ?>
           </ul>
         </div>
       </div>
@@ -447,37 +581,37 @@ if (!isset($_SESSION["usuario"])) {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.13.0/Sortable.min.js"></script>
 
     <script>
-    function filtrarTabela() {
-      var input = document.querySelector('.search_box');
-      var filter = input.value.toUpperCase();
-      var table = document.querySelector('.table');
-      var rows = table.getElementsByTagName('tr');
+      function filtrarTabela() {
+        var input = document.querySelector('.search_box');
+        var filter = input.value.toUpperCase();
+        var table = document.querySelector('.table');
+        var rows = table.getElementsByTagName('tr');
 
-      for (var i = 0; i < rows.length; i++) {
-        var columns = rows[i].getElementsByTagName('td');
-        var visible = false;
+        for (var i = 0; i < rows.length; i++) {
+          var columns = rows[i].getElementsByTagName('td');
+          var visible = false;
 
-        for (var j = 0; j < columns.length; j++) {
-          var column = columns[j];
-          if (column) {
-            var text = column.textContent || column.innerText;
-            if (text.toUpperCase().indexOf(filter) > -1) {
-              visible = true;
-              break;
+          for (var j = 0; j < columns.length; j++) {
+            var column = columns[j];
+            if (column) {
+              var text = column.textContent || column.innerText;
+              if (text.toUpperCase().indexOf(filter) > -1) {
+                visible = true;
+                break;
+              }
             }
           }
+
+          rows[i].style.display = visible ? '' : 'none';
         }
-
-        rows[i].style.display = visible ? '' : 'none';
       }
-    }
 
-    var searchButton = document.querySelector('.button');
-    searchButton.addEventListener('click', filtrarTabela);
+      var searchButton = document.querySelector('.button');
+      searchButton.addEventListener('click', filtrarTabela);
 
-    var searchInput = document.querySelector('.search_box');
-    searchInput.addEventListener('keyup', filtrarTabela);
-  </script>
+      var searchInput = document.querySelector('.search_box');
+      searchInput.addEventListener('keyup', filtrarTabela);
+    </script>
 
 </body>
 

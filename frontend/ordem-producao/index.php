@@ -3,6 +3,77 @@ session_start();
 if (!isset($_SESSION["usuario"])) {
   header("location:/");
 }
+
+// op categories
+// Tradicional = 1
+// Artesanal = 2
+// SemAlcool = 3
+
+$opCategories = array(
+  1 => "Tradicional",
+  2 => "Artesanal",
+  3 => "Sem Álcool"
+);
+
+/*op status
+Aguardando = 1
+Execucao = 2
+Parado = 3
+Interrompido = 4
+Finalizado = 5
+*/
+$opStatus = array(
+  1 => "Aguardando",
+  2 => "Execução",
+  3 => "Parado",
+  4 => "Interrompido",
+  5 => "Finalizado"
+);
+
+function dotnetDateTimeToBrDate($date)
+{
+  $date = explode("T", $date)[0];
+  $date = explode("-", $date);
+  return $date[2] . "/" . $date[1] . "/" . $date[0];
+}
+
+$currentPage = 1;
+$pageLength = 2;
+$deleted = null;
+$updated = null;
+
+if (isset($_GET["updated"])) {
+  $updated = $_GET["updated"];
+}
+
+if (isset($_GET["deleted"])) {
+  $deleted = $_GET["deleted"];
+}
+
+if (isset($_GET["page"])) {
+  $currentPage = $_GET["page"];
+}
+
+require_once("../RestApiClient.php");
+
+$api = new RestApiClient();
+
+$queries = array(
+  "pagina" => $currentPage,
+  "tamanhoPagina" => $pageLength
+);
+
+
+$response = $api->get("OrdemProducao/GetAllActivatedProductionOrder", $queries, $_SESSION["token"]);
+
+$ordensProducao = array();
+$totalPages = 1;
+
+if (isset($response) && isset($response["ordensProducao"])) {
+  $ordensProducao = $response["ordensProducao"];
+  $totalPages = $response["totalPages"];
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -21,6 +92,23 @@ if (!isset($_SESSION["usuario"])) {
 </head>
 
 <style>
+  .alert {
+    padding: 20px;
+    margin: 10px 0;
+  }
+
+  .alert.alert-success {
+    color: #3c763d;
+    background-color: #dff0d8;
+    border-color: #d6e9c6;
+  }
+
+  .alert.alert-error {
+    color: #a94442;
+    background-color: #f2dede;
+    border-color: #ebccd1;
+  }
+
   .table th,
   .table td {
     border: 1px solid #ccc;
@@ -323,41 +411,92 @@ if (!isset($_SESSION["usuario"])) {
       <div class="container">
         <div class="row">
           <div class="col  m-2">
-            <h2>Informções da cerveja produzida</h2>
+            <h2>Informações da cerveja produzida</h2>
           </div>
+          <?php
+          if ($updated != null) {
+            if ($updated == "true") {
+              echo "<div class='alert alert-success' role='alert'>
+                    {$_SESSION["updateOPMessage"]}
+                </div>";
+            } else if (isset($_SESSION["updateOPMessage"])) {
+              echo "<div class='alert alert-error' role='alert'>
+                   {$_SESSION["updateOPMessage"]}
+                </div>";
+            } else {
+              echo "<div class='alert alert-error' role='alert'>
+                   Erro ao atualizar a ordem de produção!
+                </div>";
+            }
+          }
+          ?>
+          <?php
+          if ($deleted != null) {
+            if ($deleted == "true") {
+              echo "<div class='alert alert-success' role='alert'>
+                    {$_SESSION["deleteOPMessage"]}
+                </div>";
+            } else if (isset($_SESSION["deleteOPMessage"])) {
+              echo "<div class='alert alert-error' role='alert'>
+                   {$_SESSION["deleteOPMessage"]}
+                </div>";
+            } else {
+              echo "<div class='alert alert-error' role='alert'>
+                   Erro ao apagar a ordem de produção!
+                </div>";
+            }
+          }
+          ?>
         </div>
 
         <table class="table">
           <thead>
             <tr>
               <th>OP. Nº</th>
-              <th>Data</th>
+              <th>Criado em</th>
               <th>Quantidade</th>
-              <th>Tipo</th>
+              <th>Categoria</th>
               <th>Status</th>
               <th></th>
               <th></th>
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>Dado 1</td>
-              <td>Dado 2</td>
-              <td>Dado 3</td>
-              <td>Dado 4</td>
-              <td>Dado 5</td>
-              <td><button class="button-custom2" onclick="openModal()"><em>Editar</em></button></td>
-              <td><button class="button-custom3" onclick="openModal2()"><em>Excluir</em></button></td>
-            </tr>
+            <?php foreach ($ordensProducao as $op): ?>
+              <tr>
+                <td>
+                  <?php echo $op["id"] ?>
+                </td>
+                <td>
+                  <?php echo dotnetDateTimeToBrDate($op["dataCriacao"]) ?>
+                </td>
+                <td>
+                  <?php echo $op["quantidade"] ?>
+                </td>
+                <td>
+                  <?php echo $opCategories[$op["categoria"]] ?>
+                </td>
+                <td>
+                  <?php echo $opStatus[$op["status"]] ?>
+                </td>
+                <td><button class="button-custom2" onclick="openModal(<?php echo $op['id'] ?>)"><em>Editar</em></button>
+                </td>
+                <td>
+                  <form method="POST" action="/ordem-producao/delete-op.php">
+                    <input type="hidden" name="opId" id="opId" value="<?php echo $op['id'] ?>">
+                    <button class="button-custom3" type="submit"><em>Excluir</em></button>
+                  </form>
+                </td>
+              </tr>
+            <?php endforeach; ?>
           </tbody>
         </table>
         <div class="pagination">
           <ul>
-            <li><a href="#" class="active">1</a></li>
-            <li><a href="#">2</a></li>
-            <li><a href="#">3</a></li>
-            <li><a href="#">4</a></li>
-            <li><a href="#">5</a></li>
+            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+              <li><a class="<?php if ($i == $currentPage)
+                echo "active" ?>" href="?page=<?php echo $i ?>"><?php echo $i ?></a></li>
+            <?php endfor; ?>
           </ul>
         </div>
       </div>
@@ -373,40 +512,29 @@ if (!isset($_SESSION["usuario"])) {
     <div class="modal-content">
       <span class="close" onclick="closeModal()">&times;</span>
       <h2>Atualizar </h2>
-      <form id="updateForm">
-
+      <form id="updateForm" action="/ordem-producao/update-op.php" method="POST">
         <div class="form-input">
-          <input type="number" id="quantity" name="quantity" placeholder="Quantidade:">
+          <input id="ipt-to-update" type="hidden" id="opId" name="opId" value="">
+          <input type="number" id="quantidade" name="quantidade" placeholder="Quantidade:">
         </div>
-        <div class="form-input">
-          <input type="text" id="type" name="type" placeholder="Tipo:">
-        </div>
-        <div class="form-input">
-          <input type="text" id="type" name="type" placeholder="Status">
-        </div>
-
-        <button class="button-custom" type="submit">Atualizar</button>
+        <button class="button-custom" type="submit" onclick="closeModal()">Atualizar</button>
       </form>
     </div>
   </div>
 
   <script>
     // Função para abrir o modal
-    function openModal() {
-      document.getElementById("myModal").style.display = "block";
+    function openModal(id) {
+      const modal = document.getElementById("myModal");
+      modal.style.display = "block";
+      const iptToUpdate = document.getElementById("ipt-to-update");
+      iptToUpdate.value = id;
     }
 
     // Função para fechar o modal
     function closeModal() {
       document.getElementById("myModal").style.display = "none";
     }
-
-    // Event listener para o envio do formulário
-    document.getElementById("updateForm").addEventListener("submit", function (event) {
-      event.preventDefault();
-      // Aqui você pode adicionar a lógica para atualizar os dados no backend
-      closeModal();
-    });
   </script>
 
   <script>
@@ -419,13 +547,6 @@ if (!isset($_SESSION["usuario"])) {
     function closeModal2() {
       document.getElementById("myModal").style.display = "none";
     }
-
-    // Event listener para o envio do formulário
-    document.getElementById("updateForm").addEventListener("submit", function (event) {
-      event.preventDefault();
-      // Aqui você pode adicionar a lógica para atualizar os dados no backend
-      closeModal();
-    });
   </script>
 
   <script src="https://code.jquery.com/ui/1.13.1/jquery-ui.min.js"></script>

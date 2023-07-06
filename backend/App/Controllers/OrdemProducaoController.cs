@@ -162,4 +162,186 @@ public class OrdemProducaoController : ControllerBase
             return BadRequest(new { mensagem = "Erro ao deletar ordem de produção" });
         }
     }
+
+    [HttpPut("finalizeProductionOrder/{id}")]
+    public async Task<IActionResult> FinalizeProductionOrder([FromRoute] int id)
+    {
+        try
+        {
+            var userId = User.Claims.FirstOrDefault(c => c.Type == "id");
+
+            if (userId == null)
+                return BadRequest(new { mensagem = "Usuário não autenticado" });
+
+            var userIdInt = int.Parse(userId.Value);
+
+            var resultado = await _ordemProducaoService.FinalizeProductionOrderAsync(id, userIdInt);
+
+            if (!resultado.IsSuccess)
+                return BadRequest(new { mensagem = resultado.ErrorMessage });
+
+            return Ok(
+                new
+                {
+                    mensagem = "Ordem de produção interrompida com sucesso",
+                    ordemProducaoId = resultado.Value.Id
+                }
+            );
+        }
+        catch (System.Exception)
+        {
+            return BadRequest(new { mensagem = "Erro ao interromper ordem de produção" });
+        }
+    }
+
+    [HttpGet("GetAllActivatedProductionOrder")]
+    public async Task<IActionResult> GetAllActivatedProductionOrder(
+        [FromQuery] int pagina,
+        [FromQuery] int tamanhoPagina
+    )
+    {
+        try
+        {
+            var id = User.Claims.FirstOrDefault(c => c.Type == "id");
+
+            if (id == null)
+                return BadRequest(new { mensagem = "Usuário não autenticado" });
+
+            var userId = int.Parse(id.Value);
+
+            var resultado = await _ordemProducaoService.GetAllActivatedProductionOrderAsync(
+                pagina,
+                tamanhoPagina,
+                userId
+            );
+
+            if (!resultado.IsSuccess)
+                return BadRequest(new { mensagem = resultado.ErrorMessage });
+
+            return Ok(
+                new
+                {
+                    mensagem = "Lista com todas as ordens de produção",
+                    ordensProducao = resultado.Value.OrdensProducao,
+                    total = resultado.Value.Total,
+                    totalPages = resultado.Value.TotalPages
+                }
+            );
+        }
+        catch (System.Exception)
+        {
+            return BadRequest(new { mensagem = "Erro ao retornar ordens de produção" });
+        }
+    }
+
+    [HttpPut("UpdateQuantity/{id}")]
+    public async Task<IActionResult> UpdateQuantity(
+        [FromRoute] int id,
+        [FromBody] UpdateQuantityDto quantidadeForm
+    )
+    {
+        try
+        {
+            var userId = User.Claims.FirstOrDefault(c => c.Type == "id");
+
+            if (userId == null)
+                return BadRequest(new { mensagem = "Usuário não autenticado" });
+
+            var userIdInt = int.Parse(userId.Value);
+
+            var resultado = await _ordemProducaoService.UpdateQuantityAsync(
+                id,
+                userIdInt,
+                quantidadeForm.quantidade
+            );
+
+            if (!resultado.IsSuccess)
+                return BadRequest(new { mensagem = resultado.ErrorMessage });
+
+            return Ok(
+                new
+                {
+                    mensagem = "A quantidade da ordem de produção foi atualizada com sucesso",
+                    ordemProducao = resultado.Value
+                }
+            );
+        }
+        catch (System.Exception)
+        {
+            return BadRequest(
+                new { mensagem = "Erro ao atualizar quantidade da ordem de produção" }
+            );
+        }
+    }
+
+    [HttpDelete("DeleteProductionOrder/{id}")]
+    public async Task<IActionResult> DeleteProductionOrder([FromRoute] int id)
+    {
+        try
+        {
+            var userId = User.Claims.FirstOrDefault(c => c.Type == "id");
+
+            if (userId == null)
+                return BadRequest(new { mensagem = "Usuário não autenticado" });
+
+            var userIdInt = int.Parse(userId.Value);
+
+            var resultado = await _ordemProducaoService.DeleteProductionOrderAsync(id, userIdInt);
+
+            if (!resultado.IsSuccess)
+                return BadRequest(new { mensagem = resultado.ErrorMessage });
+
+            return Ok(
+                new
+                {
+                    mensagem = "Ordem de produção apagada com sucesso",
+                    ordemProducaoId = resultado.Value.Id
+                }
+            );
+        }
+        catch (System.Exception)
+        {
+            return BadRequest(new { mensagem = "Erro ao apagar ordem de produção" });
+        }
+    }
+
+    [HttpGet("GetAllFinishedProductionOrder")]
+    public async Task<IActionResult> GetAllFinishedProductionOrder(
+        [FromQuery] int pagina,
+        [FromQuery] int tamanhoPagina
+    )
+    {
+        try
+        {
+            var id = User.Claims.FirstOrDefault(c => c.Type == "id");
+
+            if (id == null)
+                return BadRequest(new { mensagem = "Usuário não autenticado" });
+
+            var userId = int.Parse(id.Value);
+
+            var resultado = await _ordemProducaoService.GetAllFinishedProductionOrderAsync(
+                pagina,
+                tamanhoPagina,
+                userId
+            );
+
+            if (!resultado.IsSuccess)
+                return BadRequest(new { mensagem = resultado.ErrorMessage });
+
+            return Ok(
+                new
+                {
+                    mensagem = "Lista com todas as ordens de produção",
+                    ordensProducao = resultado.Value.OrdensProducao,
+                    total = resultado.Value.Total,
+                    totalPages = resultado.Value.TotalPages
+                }
+            );
+        }
+        catch (System.Exception)
+        {
+            return BadRequest(new { mensagem = "Erro ao retornar ordens de produção" });
+        }
+    }
 }

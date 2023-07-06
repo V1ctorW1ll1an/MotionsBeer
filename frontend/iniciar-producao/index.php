@@ -3,11 +3,12 @@ session_start();
 if (!isset($_SESSION["usuario"])) {
   header("location:/");
 }
-require_once '../RestApiClient.php';
-//$rest = new RestApiClient();
-//$response = $rest->post("login", $data);
-//var_dump($response);
-//$token = $response['token'];
+
+$isSuccess = null;
+
+if (isset($_GET["success"])) {
+  $isSuccess = $_GET["success"];
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -25,6 +26,22 @@ require_once '../RestApiClient.php';
 </head>
 
 <style>
+  .alert {
+    padding: 20px;
+    margin: 10px 0;
+  }
+
+  .alert.alert-success {
+    color: #3c763d;
+    background-color: #dff0d8;
+    border-color: #d6e9c6;
+  }
+
+  .alert.alert-error {
+    color: #a94442;
+    background-color: #f2dede;
+    border-color: #ebccd1;
+  }
 
   /* Estilos para o botão do modal */
   #quantidade-form button {
@@ -41,8 +58,8 @@ require_once '../RestApiClient.php';
     background-color: #45a049;
   }
 
-   /* Estilos para o input do modal */
-   #quantidade-engradados {
+  /* Estilos para o input do modal */
+  #quantidade-engradados {
     width: 70%;
     padding: 10px;
     border: 1px solid #ccc;
@@ -95,6 +112,7 @@ require_once '../RestApiClient.php';
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     position: relative;
   }
+
   .close {
     position: absolute;
     top: 0;
@@ -250,7 +268,9 @@ require_once '../RestApiClient.php';
           <img src="images/profile.png" alt="logo_img" />
         </span>
         <div class="data_text">
-          <span class="email"><?php echo $_SESSION["usuario"]["email"]?></span>
+          <span class="email">
+            <?php echo $_SESSION["usuario"]["email"] ?>
+          </span>
         </div>
       </div>
     </div>
@@ -266,7 +286,24 @@ require_once '../RestApiClient.php';
 
   <!-- Site -->
   <div>
-    <h1 class="display-2">Vamos iniciar a criação <?php echo $_SESSION["usuario"]["nome"]?> </h1>
+    <h1 class="display-2">Vamos iniciar a criação
+      <?php echo $_SESSION["usuario"]["nome"] ?>
+    </h1>
+    <div>
+      <?php
+      if ($isSuccess != null) {
+        if ($isSuccess == "true") {
+          echo "<div class='alert alert-success' role='alert'>
+                    Ordem de Produção adicionada com sucesso! Acompanhe o processo na guia 'Acompanhar Processo'.
+                  </div>";
+        } else {
+          echo "<div class='alert alert-error' role='alert'>
+                    Erro ao adicionar Ordem de Produção!
+                </div>";
+        }
+      }
+      ?>
+    </div>
     <div class="card">
       <div class="col">
         <div class="row">
@@ -280,9 +317,10 @@ require_once '../RestApiClient.php';
             <div id="modal" class="modal">
               <div class="modal-content">
                 <span class="close" onclick="fecharModal()">&times;</span>
-                <form id="quantidade-card1" action="./cadastra_producao.php" method="POST">
-                <input type="text" id="id_usuario" name="id_usuario" hidden />
-                <input type="number" id="quantidade" placeholder="Quantidade de Engradados:" name="quantidade" required min="1" />
+                <form id="quantidade-card1" action="/iniciar-producao/add_beer.php" method="POST">
+                  <input type="text" id="categoria" name="categoria" hidden value="1" />
+                  <input type="number" id="quantidade" placeholder="Quantidade de Engradados:" name="quantidade"
+                    required min="1" />
                   <button type="submit">Confirmar</button>
                 </form>
               </div>
@@ -294,12 +332,13 @@ require_once '../RestApiClient.php';
               <img src="/menu/images/card1.jpg" alt="Descrição da imagem">
             </div>
             <!-- modal -->
-            <div id="modal" class="modal">
+            <div id="modal1" class="modal">
               <div class="modal-content">
                 <span class="close" onclick="fecharModal1()">&times;</span>
-                <form id="quantidade-card2" action="./cadastra_producao.php" method="POST">
-                <input type="text" id="id_usuario" name="id_usuario" hidden />
-                <input type="number" id="quantidade" placeholder="Quantidade de Engradados:" name="quantidade" required min="1" />
+                <form id="quantidade-card2" action="/iniciar-producao/add_beer.php" method="POST">
+                  <input type="text" id="categoria" name="categoria" hidden value="2" />
+                  <input type="number" id="quantidade" placeholder="Quantidade de Engradados:" name="quantidade"
+                    required min="1" />
                   <button type="submit">Confirmar</button>
                 </form>
               </div>
@@ -312,12 +351,13 @@ require_once '../RestApiClient.php';
             </div>
           </div>
           <!-- modal -->
-          <div id="modal" class="modal">
+          <div id="modal2" class="modal">
             <div class="modal-content">
               <span class="close" onclick="fecharModal2()">&times;</span>
-              <form id="quantidade-card3" action="./cadastra_producao.php" method="POST">
-                <input type="text" id="id_usuario" name="id_usuario" hidden />
-                <input type="number" id="quantidade" placeholder="Quantidade de Engradados:" name="quantidade" required min="1" />
+              <form id="quantidade-card3" action="/iniciar-producao/add_beer.php" method="POST">
+                <input type="text" id="categoria" name="categoria" hidden value="3" />
+                <input type="number" id="quantidade" placeholder="Quantidade de Engradados:" name="quantidade" required
+                  min="1" />
                 <button type="submit">Confirmar</button>
               </form>
             </div>
@@ -346,21 +386,21 @@ require_once '../RestApiClient.php';
 
     <script>
       function abrirModal1() {
-        document.getElementById('modal').style.display = 'block';
+        document.getElementById('modal1').style.display = 'block';
       }
 
       function fecharModal1() {
-        document.getElementById('modal').style.display = 'none';
+        document.getElementById('modal1').style.display = 'none';
       }
     </script>
 
     <script>
       function abrirModal2() {
-        document.getElementById('modal').style.display = 'block';
+        document.getElementById('modal2').style.display = 'block';
       }
 
       function fecharModal2() {
-        document.getElementById('modal').style.display = 'none';
+        document.getElementById('modal2').style.display = 'none';
       }
     </script>
 
