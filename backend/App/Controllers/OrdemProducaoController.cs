@@ -1,3 +1,4 @@
+using App.Dto;
 using App.Models;
 using App.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -90,6 +91,44 @@ public class OrdemProducaoController : ControllerBase
         catch (System.Exception)
         {
             return BadRequest(new { mensagem = "Erro ao retornar ordens de produção" });
+        }
+    }
+
+    [HttpPut("ProcessStep/{id}")]
+    public async Task<IActionResult> UpdateProcessStep(
+        [FromRoute] int id,
+        [FromBody] UpdateProcessDto processForm
+    )
+    {
+        try
+        {
+            var userId = User.Claims.FirstOrDefault(c => c.Type == "id");
+
+            if (userId == null)
+                return BadRequest(new { mensagem = "Usuário não autenticado" });
+
+            var userIdInt = int.Parse(userId.Value);
+
+            var resultado = await _ordemProducaoService.UpdateProcessStepAsync(
+                id,
+                userIdInt,
+                processForm.NovaEtapa
+            );
+
+            if (!resultado.IsSuccess)
+                return BadRequest(new { mensagem = resultado.ErrorMessage });
+
+            return Ok(
+                new
+                {
+                    mensagem = "A etapa do processo foi atualizada com sucesso",
+                    ordemProducao = resultado.Value
+                }
+            );
+        }
+        catch (System.Exception)
+        {
+            return BadRequest(new { mensagem = "Erro ao atualizar etapa do processo" });
         }
     }
 }

@@ -8,7 +8,7 @@ public class OrdemProducao
     public int Id { get; set; }
 
     [DataType(DataType.DateTime)]
-    public DateTime DataCriacao { get; set; } = DateTime.Now;
+    public DateTime DataCriacao { get; set; } = DateTime.UtcNow;
 
     [DataType(DataType.DateTime)]
     public DateTime? DataInicio { get; set; } = null;

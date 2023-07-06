@@ -12,11 +12,11 @@ public class OrdemProducaoService : IOrdemProducaoService
         new()
         {
             // 40 dias
+            { Categoria.Tradicional, 57600 },
+            // 40 dias
             { Categoria.Artesanal, 57600 },
             // 36 horas
             { Categoria.SemAlcool, 2160 },
-            // 40 dias
-            { Categoria.Tradicional, 57600 },
         };
 
     public OrdemProducaoService(DataBaseContext context)
@@ -26,7 +26,7 @@ public class OrdemProducaoService : IOrdemProducaoService
 
     public async Task<ServiceResult<OrdemProducao>> CreateAsync(OrdemProducao ordemProducao)
     {
-        ordemProducao.EtapaNoProcesso = Processo.Maltagem;
+        ordemProducao.EtapaNoProcesso = 0;
         ordemProducao.Status = OrdemProducaoStatus.Aguardando;
 
         await _dataBaseContext.OrdensProducao.AddAsync(ordemProducao);
@@ -69,5 +69,54 @@ public class OrdemProducaoService : IOrdemProducaoService
         };
 
         return Task.FromResult(ServiceResult<OrdemProducaoOutput>.Success(ordensProducaoOutput));
+    }
+
+    public async Task<ServiceResult<OrdemProducao>> UpdateProcessStepAsync(
+        int id,
+        int userId,
+        Processo processStep
+    )
+    {
+        var ordemProducao = await _dataBaseContext.OrdensProducao.FindAsync(id);
+
+        if (ordemProducao == null)
+            return ServiceResult<OrdemProducao>.Failure("Ordem de produção não encontrada");
+
+        if (ordemProducao.UsuarioId != userId)
+            return ServiceResult<OrdemProducao>.Failure(
+                "Você não tem permissão para alterar esta ordem de produção"
+            );
+
+        if (
+            ordemProducao.Status == OrdemProducaoStatus.Cancelado
+            || ordemProducao.Status == OrdemProducaoStatus.Finalizado
+        )
+            return ServiceResult<OrdemProducao>.Failure("Esta ordem de produção já foi finalizada");
+
+        if (ordemProducao.EtapaNoProcesso == processStep)
+            return ServiceResult<OrdemProducao>.Failure(
+                "Esta ordem de produção já está nesta etapa"
+            );
+
+        if (ordemProducao.EtapaNoProcesso > processStep)
+            return ServiceResult<OrdemProducao>.Failure(
+                "Esta ordem de produção já passou desta etapa"
+            );
+
+        if (ordemProducao.EtapaNoProcesso == 0)
+        {
+            ordemProducao.DataInicio = DateTime.UtcNow;
+            ordemProducao.DataFim = DateTime.UtcNow.AddMinutes(
+                _duracoesEmMinutos[ordemProducao.Categoria]
+            );
+            ordemProducao.Status = OrdemProducaoStatus.Execucao;
+        }
+        ordemProducao.EtapaNoProcesso = processStep;
+
+        _dataBaseContext.OrdensProducao.Update(ordemProducao);
+
+        await _dataBaseContext.SaveChangesAsync();
+
+        return ServiceResult<OrdemProducao>.Success(ordemProducao);
     }
 }

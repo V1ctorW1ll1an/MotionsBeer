@@ -5,12 +5,14 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=https://+:443;http://+:80
+      - TZ=America/Sao_Paulo
     ports:
       - 65258:443
       - 65257:80
     volumes:
       - ~/.aspnet/https:/root/.aspnet/https:ro
       - ~/.microsoft/usersecrets:/root/.microsoft/usersecrets:ro
+      - /etc/localtime:/etc/localtime:ro
     depends_on:
       - postgres
     networks:
