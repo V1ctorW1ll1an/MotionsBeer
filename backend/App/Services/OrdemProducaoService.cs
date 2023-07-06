@@ -39,6 +39,25 @@ public class OrdemProducaoService : IOrdemProducaoService
         return ServiceResult<OrdemProducao>.Success(ordemProducao);
     }
 
+    public async Task<ServiceResult<OrdemProducao>> DeleteAsync(int id, int userId)
+    {
+        var ordemProducao = await _dataBaseContext.OrdensProducao.FindAsync(id);
+
+        if (ordemProducao == null)
+            return ServiceResult<OrdemProducao>.Failure("Ordem de produção não encontrada");
+
+        if (ordemProducao.UsuarioId != userId)
+            return ServiceResult<OrdemProducao>.Failure(
+                "Você não tem permissão para excluir esta ordem de produção"
+            );
+
+        _dataBaseContext.OrdensProducao.Remove(ordemProducao);
+
+        await _dataBaseContext.SaveChangesAsync();
+
+        return ServiceResult<OrdemProducao>.Success(ordemProducao);
+    }
+
     public Task<ServiceResult<OrdemProducaoOutput>> GetProcessStepAsync(
         int pagina,
         int tamanhoPagina,

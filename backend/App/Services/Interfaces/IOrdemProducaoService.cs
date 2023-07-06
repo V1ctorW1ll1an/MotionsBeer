@@ -26,4 +26,6 @@ public interface IOrdemProducaoService
         int userId,
         Processo processStep
     );
+
+    Task<ServiceResult<OrdemProducao>> DeleteAsync(int id, int userId);
 }
