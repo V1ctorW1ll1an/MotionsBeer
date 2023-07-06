@@ -28,4 +28,22 @@ public interface IOrdemProducaoService
     );
 
     Task<ServiceResult<OrdemProducao>> DeleteAsync(int id, int userId);
+
+    Task<ServiceResult<OrdemProducao>> FinalizeProductionOrderAsync(int id, int userId);
+
+    Task<ServiceResult<OrdemProducaoOutput>> GetAllActivatedProductionOrderAsync(
+        int pagina,
+        int tamanhoPagina,
+        int userId
+    );
+
+    Task<ServiceResult<OrdemProducao>> UpdateQuantityAsync(int id, int userId, int quantity);
+
+    Task<ServiceResult<OrdemProducao>> DeleteProductionOrderAsync(int id, int userId);
+
+    Task<ServiceResult<OrdemProducaoOutput>> GetAllFinishedProductionOrderAsync(
+        int pagina,
+        int tamanhoPagina,
+        int userId
+    );
 }

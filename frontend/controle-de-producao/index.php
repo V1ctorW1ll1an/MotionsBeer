@@ -3,6 +3,52 @@ session_start();
 if (!isset($_SESSION["usuario"])) {
   header("location:/");
 }
+
+// op categories
+// Tradicional = 1
+// Artesanal = 2
+// SemAlcool = 3
+
+$opCategories = array(
+  1 => "Tradicional",
+  2 => "Artesanal",
+  3 => "Sem Álcool"
+);
+
+function dotnetDateTimeToBrDate($date)
+{
+  $date = explode("T", $date)[0];
+  $date = explode("-", $date);
+  return $date[2] . "/" . $date[1] . "/" . $date[0];
+}
+
+$currentPage = 1;
+$pageLength = 2;
+
+if (isset($_GET["page"])) {
+  $currentPage = $_GET["page"];
+}
+
+require_once("../RestApiClient.php");
+
+$api = new RestApiClient();
+
+$queries = array(
+  "pagina" => $currentPage,
+  "tamanhoPagina" => $pageLength
+);
+
+
+$response = $api->get("OrdemProducao/GetAllFinishedProductionOrder", $queries, $_SESSION["token"]);
+
+$ordensProducao = array();
+$totalPages = 1;
+
+if (isset($response) && isset($response["ordensProducao"])) {
+  $ordensProducao = $response["ordensProducao"];
+  $totalPages = $response["totalPages"];
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -300,7 +346,7 @@ if (!isset($_SESSION["usuario"])) {
     <i class="bx bx-menu" id="sidebar-open"></i>
     <input type="text" placeholder="Buscar..." class="search_box" />
     <div>
-    <button class="button" hidden>Pesquisar</button>
+      <button class="button" hidden>Pesquisar</button>
     </div>
   </nav>
 
@@ -325,21 +371,30 @@ if (!isset($_SESSION["usuario"])) {
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>Dado 1</td>
-              <td>Dado 2</td>
-              <td>Dado 3</td>
-              <td>Dado 4</td>
-            </tr>
+            <?php foreach ($ordensProducao as $op): ?>
+              <tr>
+                <td>
+                  <?php echo $op["id"] ?>
+                </td>
+                <td>
+                  <?php echo $opCategories[$op["categoria"]] ?>
+                </td>
+                <td>
+                  <?php echo dotnetDateTimeToBrDate($op["dataFim"]) ?>
+                </td>
+                <td>
+                  <?php echo $op["quantidade"] ?>
+                </td>
+              </tr>
+            <?php endforeach; ?>
           </tbody>
         </table>
         <div class="pagination">
           <ul>
-            <li><a href="#" class="active">1</a></li>
-            <li><a href="#">2</a></li>
-            <li><a href="#">3</a></li>
-            <li><a href="#">4</a></li>
-            <li><a href="#">5</a></li>
+            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+              <li><a class="<?php if ($i == $currentPage)
+                echo "active" ?>" href="?page=<?php echo $i ?>"><?php echo $i ?></a></li>
+            <?php endfor; ?>
           </ul>
         </div>
       </div>

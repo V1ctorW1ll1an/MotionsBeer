@@ -1,3 +1,15 @@
+<?php
+session_start();
+if (isset($_SESSION["usuario"])) {
+	header("location:/menu");
+}
+
+$added = null;
+
+if (isset($_GET["added"])) {
+	$added = $_GET["added"];
+}
+?>
 <!DOCTYPE html>
 <html lang="pt-br">
 
@@ -34,7 +46,7 @@
 
 		.loginbox {
 			width: 66%;
-			height: 42%;
+			height: auto !important;
 			background: #fff;
 			color: #344a6d;
 			top: 50%;
@@ -110,6 +122,25 @@
 			background-size: cover;
 			/* Ajusta o tamanho do wallpaper para cobrir todo o fundo */
 		}
+
+
+	}
+
+	.alert {
+		padding: 20px;
+		margin: 10px 0;
+	}
+
+	.alert.alert-success {
+		color: #3c763d;
+		background-color: #dff0d8;
+		border-color: #d6e9c6;
+	}
+
+	.alert.alert-error {
+		color: #a94442;
+		background-color: #f2dede;
+		border-color: #ebccd1;
 	}
 </style>
 
@@ -119,6 +150,25 @@
 		<h1>Bem vindo a
 			Motions'Beer
 		</h1>
+		<div>
+			<?php
+			if ($added != null) {
+				if ($added == "true") {
+					echo "<div class='alert alert-success' role='alert'>
+                  {$_SESSION["addUserMessage"]}
+                </div>";
+				} else if (isset($_SESSION["addUserMessage"])) {
+					echo "<div class='alert alert-error' role='alert'>
+                   {$_SESSION["addUserMessage"]}
+                </div>";
+				} else {
+					echo "<div class='alert alert-error' role='alert'>
+                   Erro ao se cadastrar, por favor tente novamente.
+                </div>";
+				}
+			}
+			?>
+		</div>
 
 		<form method="post" action="autenticacao.php">
 			<?php if (isset($_SESSION["login_status"]) && $_SESSION["login_status"] === "error"): ?>
@@ -134,7 +184,7 @@
 			<input type="password" name="senha" id="senha" placeholder="Digite sua senha" required>
 			<input type="submit" name="" value="Entrar">
 			<center>
-				<p><u><a href="/esqueci.html">Cadastrar</a></u></p>
+				<p><u><a href="/cadastro.php">Cadastrar</a></u></p>
 			</center>
 		</form>
 	</div>

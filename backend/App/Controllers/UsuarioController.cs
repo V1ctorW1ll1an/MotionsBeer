@@ -7,7 +7,6 @@ namespace App.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Roles = "Admin")]
 public class UsuarioController : ControllerBase
 {
     private readonly IUsuarioService _usuarioService;
@@ -20,6 +19,7 @@ public class UsuarioController : ControllerBase
     }
 
     [HttpPost]
+    [AllowAnonymous]
     public async Task<ActionResult<dynamic>> AddAsync([FromBody] Usuario usuarioForm)
     {
         try
@@ -41,7 +41,7 @@ public class UsuarioController : ControllerBase
                         usuario.NivelDeAcesso,
                         usuario.Cpf
                     },
-                    mensagem = "Funcionário cadastrado com sucesso"
+                    mensagem = "O seu usuario foi cadastrado com sucesso, agora você está pronto para fazer login"
                 }
             );
         }
@@ -52,6 +52,7 @@ public class UsuarioController : ControllerBase
     }
 
     [HttpGet("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<dynamic>> GetAsync(int id)
     {
         try
@@ -83,6 +84,7 @@ public class UsuarioController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<dynamic>> GetAllAsync(
         [FromQuery] int pagina = 1,
         [FromQuery] int tamanhoPagina = 10
@@ -110,6 +112,7 @@ public class UsuarioController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<dynamic>> DeleteAsync(int id)
     {
         try
@@ -128,6 +131,7 @@ public class UsuarioController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<dynamic>> AtualizarUsuarioAsync(
         [FromBody] Usuario usuarioForm,
         int id
@@ -158,6 +162,7 @@ public class UsuarioController : ControllerBase
 
     [HttpGet]
     [Route("desativados")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<dynamic>> GetAllDisabledAsync()
     {
         try
