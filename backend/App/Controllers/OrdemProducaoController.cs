@@ -131,4 +131,35 @@ public class OrdemProducaoController : ControllerBase
             return BadRequest(new { mensagem = "Erro ao atualizar etapa do processo" });
         }
     }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete([FromRoute] int id)
+    {
+        try
+        {
+            var userId = User.Claims.FirstOrDefault(c => c.Type == "id");
+
+            if (userId == null)
+                return BadRequest(new { mensagem = "Usuário não autenticado" });
+
+            var userIdInt = int.Parse(userId.Value);
+
+            var resultado = await _ordemProducaoService.DeleteAsync(id, userIdInt);
+
+            if (!resultado.IsSuccess)
+                return BadRequest(new { mensagem = resultado.ErrorMessage });
+
+            return Ok(
+                new
+                {
+                    mensagem = "Ordem de produção deletada com sucesso",
+                    ordemProducaoId = resultado.Value.Id
+                }
+            );
+        }
+        catch (System.Exception)
+        {
+            return BadRequest(new { mensagem = "Erro ao deletar ordem de produção" });
+        }
+    }
 }
