@@ -1,6 +1,9 @@
-# titulo aqui
+# Motion's Beer
 
-## Descrição do Projeto
+## Este trabalho apresenta o desenvolvimento de um sistema de controle de produção de cerveja que visa proporcionar aos usuários uma experiência única de aprendizado do processo de fabricação de cerveja artesanal. O sistema permite que os usuários realizem cadastro, tenham acesso a um software de alta usabilidade e acompanhem um passo a passo detalhado para a produção de cerveja, utilizando uma interface intuitiva e amigável. O objetivo principal é criar uma plataforma que possibilite aos usuários, mesmo sem conhecimentos prévios na área, aprenderem de forma simples e interativa a arte de produzir cerveja artesanal. Para isso, são utilizadas diversas tecnologias no desenvolvimento do site, garantindo um ambiente moderno e atrativo.
+A partir do cadastro no sistema, os usuários têm acesso a uma série de recursos, incluindo informações sobre os ingredientes necessários, etapas do processo de produção, dicas e boas práticas. Além disso, a plataforma oferece um sistema de acompanhamento em tempo real, permitindo que os usuários registrem e monitorem o progresso da produção da sua própria cerveja.
+A usabilidade do software é um fator-chave, proporcionando aos usuários uma experiência intuitiva e agradável, facilitando o aprendizado e a execução das etapas de produção. A interface do site é projetada de forma a tornar a aprendizagem da produção de cerveja artesanal uma experiência envolvente e interativa. Nesse contexto, são empregadas diversas tecnologias, como frameworks de desenvolvimento front-end, banco de dados e linguagens de programação, para garantir um site robusto e eficiente. Além disso, a utilização de Docker permite a implantação do sistema em diferentes ambientes, garantindo a flexibilidade e a portabilidade da aplicação.
+Em suma, este trabalho apresenta um sistema de controle de produção de cerveja que oferece aos usuários uma experiência única e interativa de aprendizado, utilizando um software de alta usabilidade e um site desenvolvido com diversas tecnologias. O objetivo é promover o conhecimento e a prática da fabricação de cerveja artesanal, tornando o processo acessível e envolvente para todos os interessados nessa arte milenar.
 
 ## Setup
 
